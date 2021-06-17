@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IO多路复用,同步，异步，阻塞和非阻塞 | LeungLoh</title><meta name="keywords" content="基础知识"><meta name="author" content="LeungLoh"><meta name="copyright" content="LeungLoh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="IO多路复用,同步，异步，阻塞和非阻塞">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IO多路复用,同步，异步，阻塞和非阻塞">
+<meta property="og:url" content="http://leungloh.com/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/index.html">
+<meta property="og:site_name" content="LeungLoh">
+<meta property="og:description" content="IO多路复用,同步，异步，阻塞和非阻塞">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leungloh.com/images/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.jpg">
+<meta property="article:published_time" content="2018-05-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-17T10:30:24.927Z">
+<meta property="article:author" content="LeungLoh">
+<meta property="article:tag" content="基础知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leungloh.com/images/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://leungloh.com/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-06-17 18:30:24'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/images/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">LeungLoh</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">IO多路复用,同步，异步，阻塞和非阻塞</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-05-08T16:00:00.000Z" title="发表于 2018-05-09 00:00:00">2018-05-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-06-17T10:30:24.927Z" title="更新于 2021-06-17 18:30:24">2021-06-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0/">学习</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>IO多路复用,同步，异步，阻塞和非阻塞</p>
+<a id="more"></a>
+<h1 id="一、什么是socket？什么是I-O操作？"><a href="#一、什么是socket？什么是I-O操作？" class="headerlink" title="一、什么是socket？什么是I/O操作？"></a>一、什么是socket？什么是I/O操作？</h1><p>我们都知道<font size="4" color="red">unix(like)世界里，一切皆文件，而文件是什么呢？文件就是一串二进制流而已，不管socket,还是FIFO、管道、终端，对我们来说，一切都是文件，一切都是流。在信息 交换的过程中，我们都是对这些流进行数据的收发操作，简称为I/O操作(input and output)</font>，往流中读出数据，系统调用read，写入数据，系统调用write。不过话说回来了 ，计算机里有这么多的流，我怎么知道要操作哪个流呢？对，就是文件描述符，即通常所说的fd，一个fd就是一个整数，所以，对这个整数的操作，就是对这个文件（流）的操作。我们创建一个socket,通过系统调用会返回一个文件描述符，那么剩下对socket的操作就会转化为对这个描述符的操作。不能不说这又是一种分层和抽象的思想。</p>
+<ul>
+<li><strong>同步异步，阻塞非阻塞区别联系</strong><br><font size="4" color="red">实际上同步与异步是针对应用程序与内核的交互而言的。同步过程中进程触发IO操作并等待(也就是我们说的阻塞)或者轮询的去查看IO操作(也就是我们说的非阻塞)是否完成。 异步过程中进程触发IO操作以后，直接返回，做自己的事情，IO交给内核来处理，完成后内核通知进程IO完成。</li>
+</ul>
+<p>同步和异步针对应用程序来，关注的是程序中间的协作关系；阻塞与非阻塞更关注的是单个进程的执行状态。</p>
+<p>同步有阻塞和非阻塞之分，异步没有，它一定是非阻塞的。</p>
+<p>阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，而自己只等待一个完成信号的时候，才是真正的异步IO。所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。</font></p>
+<ul>
+<li><strong>同步：执行一个操作之后，进程触发IO操作并等待(也就是我们说的阻塞)或者轮询的去查看IO操作(也就是我们说的非阻塞)是否完成，等待结果，然后才继续执行后续的操作。</strong></li>
+<li><strong>异步：执行一个操作后，可以去执行其他的操作，然后等待通知再回来执行刚才没执行完的操作</strong>。</li>
+<li><strong>阻塞：进程给CPU传达一个任务之后，一直等待CPU处理完成，然后才执行后面的操作。</strong></li>
+<li><strong>非阻塞：进程给CPU传达任我后，继续处理后续的操作，隔断时间再来询问之前的操作是否完成。这样的过程其实也叫轮询。</strong></li>
+</ul>
+<h1 id="二、阻塞？"><a href="#二、阻塞？" class="headerlink" title="二、阻塞？"></a>二、阻塞？</h1><p>什么是程序的阻塞呢？想象这种情形，比如你等快递，但快递一直没来，你会怎么做？有两种方式：</p>
+<ul>
+<li><strong>快递没来，我可以先去睡觉，然后快递来了给我打电话叫我去取就行了。</strong></li>
+<li><strong>快递没来，我就不停的给快递打电话说：擦，怎么还没来，给老子快点，直到快递来。</strong></li>
+</ul>
+<p>很显然，你无法忍受第二种方式，不仅耽搁自己的时间，也会让快递很想打你。<br>而在计算机世界，这两种情形就对应阻塞和非阻塞忙轮询。</p>
+<ul>
+<li><strong>非阻塞忙轮询：数据没来，进程就不停的去检测数据，直到数据来。</strong></li>
+<li><strong>阻塞：数据没来，啥都不做，直到数据来了，才进行下一步的处理。</strong></li>
+</ul>
+<p>先说说阻塞，因为一个线程只能处理一个套接字的I/O事件，如果想同时处理多个，可以利用非阻塞忙轮询的方式,伪代码如下： </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> <span class="literal">true</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="keyword">for</span> i in stream[]  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="keyword">if</span> i has data  </span><br><span class="line">        read until unavailable  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们只要把所有流从头到尾查询一遍，就可以处理多个流了，但这样做很不好，因为如果所有的流都没有I/O事件，白白浪费CPU时间片。正如有一位科学家所说，<strong>计算机所有的问题都可以增加一个中间层来解决</strong>，同样，为了避免这里cpu的空转，我们不让这个线程亲自去检查流中是否有事件，而是引进了一个代理(一开始是select,后来是poll)，这个代理很牛，它可以同时观察许多流的I/O事件，如果没有事件，代理就阻塞，线程就不会挨个挨个去轮询了，伪代码如下： </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> <span class="literal">true</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    select(streams[]) <span class="comment">//这一步死在这里，知道有一个流有I/O事件时，才往下执行  </span></span><br><span class="line">    <span class="keyword">for</span> i in streams[]  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="keyword">if</span> i has data  </span><br><span class="line">        read until unavailable  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是依然有个问题，我们从select那里仅仅知道了，有I/O事件发生了，却并不知道是哪那几个流（可能有一个，多个，甚至全部），我们只能无差别轮询所有流，找出能读出数据，或者写入数据的流，对他们进行操作。所以select具有O(n)的无差别轮询复杂度，同时处理的流越多，无差别轮询时间就越长。</p>
+<p>epoll可以理解为event poll，不同于忙轮询和无差别轮询，epoll会把哪个流发生了怎样的I/O事件通知我们。所以我们说epoll实际上是<strong>事件驱动（每个事件关联上fd）</strong>的，此时我们对这些流的操作都是有意义的。（复杂度降低到了O(1)）伪代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> <span class="literal">true</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    active_stream[] = epoll_wait(epollfd)  </span><br><span class="line">    <span class="keyword">for</span> i in active_stream[]  </span><br><span class="line">    &#123;  </span><br><span class="line">        read <span class="keyword">or</span> write till  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，select和epoll最大的区别就是：select只是告诉你一定数目的流有事件了，至于哪个流有事件，还得你一个一个地去轮询，而epoll会把发生的事件告诉你，通过发生的事件，就自然而然定位到哪个流了。不能不说epoll跟select相比，是质的飞跃，我觉得这也是一种<strong>牺牲空间，换取时间的思想</strong>，毕竟现在硬件越来越便宜了。</p>
+<h1 id="三、I-O多路复用"><a href="#三、I-O多路复用" class="headerlink" title="三、I/O多路复用"></a>三、I/O多路复用</h1><p>好了，我们讲了这么多，再来总结一下，到底什么是I/O多路复用。<br>先讲一下I/O模型：<br>首先，输入操作一般包含两个步骤：</p>
+<ul>
+<li><strong>等待数据准备好（waiting for data to beready）。对于一个套接口上的操作，这一步骤关系到数据从网络到达，并将其复制到内核的某个缓冲区。</strong></li>
+<li><strong>将数据从内核缓冲区复制到进程缓冲区（copying the data from the kernel to the process）。</strong><br>其次了解一下常用的3种I/O模型：</li>
+</ul>
+<h2 id="1、阻塞I-O模型"><a href="#1、阻塞I-O模型" class="headerlink" title="1、阻塞I/O模型"></a>1、阻塞I/O模型</h2><p>最广泛的模型是阻塞I/O模型，默认情况下，所有套接口都是阻塞的。 进程调用recvfrom系统调用，整个过程是阻塞的，直到数据复制到进程缓冲区时才返回（当然，系统调用被中断也会返回）。</p>
+<p>![][1]</p>
+<h2 id="2、非阻塞I-O模型"><a href="#2、非阻塞I-O模型" class="headerlink" title="2、非阻塞I/O模型"></a>2、非阻塞I/O模型</h2><p>当我们把一个套接口设置为非阻塞时，就是在告诉内核，当请求的I/O操作无法完成时，不要将进程睡眠，而是返回一个错误。当数据没有准备好时，内核立即返回EWOULDBLOCK错误，第四次调用系统调用时，数据已经存在，这时将数据复制到进程缓冲区中。这其中有一个操作时轮询（polling）。</p>
+<p>![][2]</p>
+<h2 id="3、I-O复用模型"><a href="#3、I-O复用模型" class="headerlink" title="3、I/O复用模型"></a>3、I/O复用模型</h2><p>此模型用到select和poll函数，这两个函数也会使进程阻塞，select先阻塞，有活动套接字才返回，但是和阻塞I/O不同的是，<strong>这两个函数可以同时阻塞多个I/O操作</strong>，而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写（<strong>就是监听多个socket</strong>）。select被调用后，进程会被阻塞，内核监视所有select负责的socket，当有任何一个socket的数据准备好了，select就会返回套接字可读，我们就可以调用recvfrom处理数据。<br><strong>正因为阻塞I/O只能阻塞一个I/O操作，而I/O复用模型能够阻塞多个I/O操作，所以才叫做多路复用</strong>。</p>
+<p>![][3]</p>
+<h2 id="4、I-O复用模型异步I-O模型-AIO-asynchronous-I-O"><a href="#4、I-O复用模型异步I-O模型-AIO-asynchronous-I-O" class="headerlink" title="4、I/O复用模型异步I/O模型(AIO, asynchronous I/O)"></a>4、I/O复用模型异步I/O模型(AIO, asynchronous I/O)</h2><p>　　进程发起read操作之后，立刻就可以开始去做其它的事。而另一方面，从kernel的角度，当它受到一个asynchronous read之后，首先它会立刻返回，所以不会对用户进程产生任何block。然后，kernel会等待数据准备完成，然后将数据拷贝到用户内存，当这一切都完成之后，kernel会给用户进程发送一个signal，告诉它read操作完成了。</p>
+<p>　　这个模型工作机制是：告诉内核启动某个操作，并让内核在整个操作(包括第二阶段，即将数据从内核拷贝到进程缓冲区中)完成后通知我们。</p>
+<p>这种模型和前一种模型区别在于：信号驱动I/O是由内核通知我们何时可以启动一个I/O操作，而异步I/O模型是由内核通知我们I/O操作何时完成。</p>
+<p>![][4]</p>
+<h1 id="高性能IO模型浅析"><a href="#高性能IO模型浅析" class="headerlink" title="高性能IO模型浅析"></a>高性能IO模型浅析</h1><p>  服务器端编程经常需要构造高性能的IO模型，常见的IO模型有四种：</p>
+<p>（1）同步阻塞IO（Blocking IO）：即传统的IO模型。</p>
+<p>（2）同步非阻塞IO（Non-blocking IO）：默认创建的socket都是阻塞的，非阻塞IO要求socket被设置为NONBLOCK。注意这里所说的NIO并非Java的NIO（New IO）库。</p>
+<p>（3）IO多路复用（IO Multiplexing）：即经典的Reactor设计模式，Java中的Selector和Linux中的epoll都是这种模型。</p>
+<p>（4）异步IO（Asynchronous IO）：即经典的Proactor设计模式，也称为异步非阻塞IO。 </p>
+<h2 id="一、同步阻塞IO"><a href="#一、同步阻塞IO" class="headerlink" title="一、同步阻塞IO"></a>一、同步阻塞IO</h2><p>同步阻塞IO模型是最简单的IO模型，用户线程在内核进行IO操作时被阻塞。</p>
+<p>![][5]</p>
+<p>用户线程通过系统调用read发起IO读操作，由用户空间转到内核空间。内核等到数据包到达后，然后将接收的数据拷贝到用户空间，完成read操作。<br>用户线程使用同步阻塞IO模型的伪代码描述为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	read(socket, buffer);</span><br><span class="line">	process(buffer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>即用户需要等待read将socket中的数据读取到buffer后，才继续处理接收的数据。整个IO请求的过程中，用户线程是被阻塞的，这导致用户在发起IO请求时，不能做任何事情，对CPU的资源利用率不够。</p>
+<h2 id="二、同步非阻塞IO"><a href="#二、同步非阻塞IO" class="headerlink" title="二、同步非阻塞IO"></a>二、同步非阻塞IO</h2><p>同步非阻塞IO是在同步阻塞IO的基础上，将socket设置为NONBLOCK。这样做用户线程可以在发起IO请求后可以立即返回。</p>
+<p>![][6]</p>
+<p>由于socket是非阻塞的方式，因此用户线程发起IO请求时立即返回。但并未读取到任何数据，用户线程需要不断地发起IO请求，直到数据到达后，才真正读取到数据，继续执行。</p>
+<p>用户线程使用同步非阻塞IO模型的伪代码描述为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="keyword">while</span>(read(socket, buffer) != SUCCESS);</span><br><span class="line">	process(buffer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>即用户需要不断地调用read，尝试读取socket中的数据，直到读取成功后，才继续处理接收的数据。整个IO请求的过程中，虽然用户线程每次发起IO请求后可以立即返回，但是为了等到数据，仍需要不断地轮询、重复请求，消耗了大量的CPU的资源。一般很少直接使用这种模型，而是在其他IO模型中使用非阻塞IO这一特性。</p>
+<h2 id="三、IO多路复用"><a href="#三、IO多路复用" class="headerlink" title="三、IO多路复用"></a>三、IO多路复用</h2><p>IO多路复用模型是建立在内核提供的多路分离函数select基础之上的，使用select函数可以避免同步非阻塞IO模型中轮询等待的问题。</p>
+<p>![][7]</p>
+<p>用户首先将需要进行IO操作的socket添加到select中，然后阻塞等待select系统调用返回。当数据到达时，socket被激活，select函数返回。用户线程正式发起read请求，读取数据并继续执行。</p>
+<p>从流程上来看，使用select函数进行IO请求和同步阻塞模型没有太大的区别，甚至还多了添加监视socket，以及调用select函数的额外操作，效率更差。但是，使用select以后最大的优势是用户可以在一个线程内同时处理多个socket的IO请求。用户可以注册多个socket，然后不断地调用select读取被激活的socket，即可达到在<strong>同一个线程内同时处理多个IO请求的目的</strong>。而在同步阻塞模型中，必须通过多线程的方式才能达到这个目的。</p>
+<p>用户线程使用select函数的伪代码描述为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">select(socket);</span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">&#123;</span><br><span class="line">    sockets = select();</span><br><span class="line">    <span class="keyword">for</span>(socket in sockets) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(can_read(socket)) </span><br><span class="line">        &#123;</span><br><span class="line">            read(socket, buffer);</span><br><span class="line">            process(buffer);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中while循环前将socket添加到select监视中，然后在while内一直调用select获取被激活的socket，一旦socket可读，便调用read函数将socket中的数据读取出来。</p>
+<p>然而，使用select函数的优点并不仅限于此。虽然上述方式允许单线程内处理多个IO请求，但是每个IO请求的过程还是阻塞的（在select函数上阻塞），平均时间甚至比同步阻塞IO模型还要长。如果用户线程只注册自己感兴趣的socket或者IO请求，然后去做自己的事情，等到数据到来时再进行处理，则可以提高CPU的利用率。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">LeungLoh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://leungloh.com/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/">http://leungloh.com/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://LeungLoh.com" target="_blank">LeungLoh</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">基础知识</a></div><div class="post_share"></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/"><img class="prev-cover" src="/images/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Git常用命令</div></div></a></div><div class="next-post pull-right"><a href="/2018/03/26/%E5%B8%B8%E8%A7%81%E7%9A%84%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/"><img class="next-cover" src="/images/%E5%B8%B8%E8%A7%81%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">常见排序算法</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2018/03/26/计算机网络/" title="计算机网络知识点"><img class="cover" src="/images/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%9F%A5%E8%AF%86%E7%82%B9.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-03-26</div><div class="title">计算机网络知识点</div></div></a></div><div><a href="/2018/03/26/操作系统/" title="操作系统常见知识点"><img class="cover" src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E7%9F%A5%E8%AF%86%E7%82%B9.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-03-26</div><div class="title">操作系统常见知识点</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">LeungLoh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LeungLoh"><i class="fab fa-github"></i><span>Github</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AFsocket%EF%BC%9F%E4%BB%80%E4%B9%88%E6%98%AFI-O%E6%93%8D%E4%BD%9C%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">一、什么是socket？什么是I&#x2F;O操作？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%98%BB%E5%A1%9E%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">二、阻塞？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81I-O%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">三、I&#x2F;O多路复用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">1、阻塞I&#x2F;O模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.2.</span> <span class="toc-text">2、非阻塞I&#x2F;O模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81I-O%E5%A4%8D%E7%94%A8%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.3.</span> <span class="toc-text">3、I&#x2F;O复用模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81I-O%E5%A4%8D%E7%94%A8%E6%A8%A1%E5%9E%8B%E5%BC%82%E6%AD%A5I-O%E6%A8%A1%E5%9E%8B-AIO-asynchronous-I-O"><span class="toc-number">3.4.</span> <span class="toc-text">4、I&#x2F;O复用模型异步I&#x2F;O模型(AIO, asynchronous I&#x2F;O)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AB%98%E6%80%A7%E8%83%BDIO%E6%A8%A1%E5%9E%8B%E6%B5%85%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">高性能IO模型浅析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9EIO"><span class="toc-number">4.1.</span> <span class="toc-text">一、同步阻塞IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%90%8C%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9EIO"><span class="toc-number">4.2.</span> <span class="toc-text">二、同步非阻塞IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8"><span class="toc-number">4.3.</span> <span class="toc-text">三、IO多路复用</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/" title="后台管理项目总结"><img src="/images/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="后台管理项目总结"/></a><div class="content"><a class="title" href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/" title="后台管理项目总结">后台管理项目总结</a><time datetime="2021-06-16T16:00:00.000Z" title="发表于 2021-06-17 00:00:00">2021-06-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/07/ansible/" title="ansible"><img src="/images/ansible.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ansible"/></a><div class="content"><a class="title" href="/2021/06/07/ansible/" title="ansible">ansible</a><time datetime="2021-06-06T16:00:00.000Z" title="发表于 2021-06-07 00:00:00">2021-06-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/13/redis%E6%80%BB%E7%BB%93/" title="redis总结"><img src="/images/redis%E6%80%BB%E7%BB%93.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="redis总结"/></a><div class="content"><a class="title" href="/2021/01/13/redis%E6%80%BB%E7%BB%93/" title="redis总结">redis总结</a><time datetime="2021-01-12T16:00:00.000Z" title="发表于 2021-01-13 00:00:00">2021-01-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令"><img src="/images/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Git常用命令"/></a><div class="content"><a class="title" href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令">Git常用命令</a><time datetime="2020-03-17T16:00:00.000Z" title="发表于 2020-03-18 00:00:00">2020-03-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/" title="IO多路复用,同步，异步，阻塞和非阻塞"><img src="/images/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="IO多路复用,同步，异步，阻塞和非阻塞"/></a><div class="content"><a class="title" href="/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/" title="IO多路复用,同步，异步，阻塞和非阻塞">IO多路复用,同步，异步，阻塞和非阻塞</a><time datetime="2018-05-08T16:00:00.000Z" title="发表于 2018-05-09 00:00:00">2018-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By LeungLoh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

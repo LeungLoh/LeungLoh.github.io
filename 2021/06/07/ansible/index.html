@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ansible | LeungLoh</title><meta name="keywords" content="tools"><meta name="author" content="LeungLoh"><meta name="copyright" content="LeungLoh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="ansible 介绍与使用官方文档 中文文档 英文文档  安装与配置 安装 12pip install ansibleyum install ansible –y 安装目录结构  配置文件目录：&#x2F;etc&#x2F;ansible&#x2F; 执行文件目录：&#x2F;usr&#x2F;bin&#x2F; Lib库依赖目录：&#x2F;usr&#x2F;lib&#x2F;pythonX.X&#x2F;site-packages&#x2F;ansible&#x2F; Help文档目录：&#x2F;usr&#x2F;share&#x2F;d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ansible">
+<meta property="og:url" content="http://leungloh.com/2021/06/07/ansible/index.html">
+<meta property="og:site_name" content="LeungLoh">
+<meta property="og:description" content="ansible 介绍与使用官方文档 中文文档 英文文档  安装与配置 安装 12pip install ansibleyum install ansible –y 安装目录结构  配置文件目录：&#x2F;etc&#x2F;ansible&#x2F; 执行文件目录：&#x2F;usr&#x2F;bin&#x2F; Lib库依赖目录：&#x2F;usr&#x2F;lib&#x2F;pythonX.X&#x2F;site-packages&#x2F;ansible&#x2F; Help文档目录：&#x2F;usr&#x2F;share&#x2F;d">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leungloh.com/images/ansible.jpg">
+<meta property="article:published_time" content="2021-06-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-17T10:33:29.712Z">
+<meta property="article:author" content="LeungLoh">
+<meta property="article:tag" content="tools">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leungloh.com/images/ansible.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://leungloh.com/2021/06/07/ansible/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-06-17 18:33:29'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/images/ansible.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">LeungLoh</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">ansible</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-06-06T16:00:00.000Z" title="发表于 2021-06-07 00:00:00">2021-06-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-06-17T10:33:29.712Z" title="更新于 2021-06-17 18:33:29">2021-06-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0/">学习</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="ansible-介绍与使用"><a href="#ansible-介绍与使用" class="headerlink" title="ansible 介绍与使用"></a>ansible 介绍与使用</h1><h2 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://ansible-tran.readthedocs.io/en/latest/index.html">中文文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.ansible.com/ansible/2.3/index.html">英文文档</a></li>
+</ul>
+<h2 id="安装与配置"><a href="#安装与配置" class="headerlink" title="安装与配置"></a>安装与配置</h2><ul>
+<li><p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install ansible</span><br><span class="line">yum install ansible –y</span><br></pre></td></tr></table></figure></li>
+<li><p>安装目录结构</p>
+<ul>
+<li>配置文件目录：/etc/ansible/</li>
+<li>执行文件目录：/usr/bin/</li>
+<li>Lib库依赖目录：/usr/lib/pythonX.X/site-packages/ansible/</li>
+<li>Help文档目录：/usr/share/doc/ansible-X.X.X/</li>
+<li>Man文档目录：/usr/share/man/man1/</li>
+</ul>
+</li>
+<li><p>/etc/ansible/ 配置说明</p>
+<ul>
+<li><p>/etc/ansible/ 中包含2个文件ansible.cfg 、hosts，</p>
+</li>
+<li><p>ansible.cfg的查找顺序是：环境变量ANSIBLE_CONFIG，~/.ansible.cfg，/etc/ansible.cfg 可能需要修改的信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">inventory &#x3D; &#x2F;etc&#x2F;ansible&#x2F;hosts		#这个参数表示资源清单inventory文件的位置</span><br><span class="line">library &#x3D; &#x2F;usr&#x2F;share&#x2F;ansible		#指向存放Ansible模块的目录，支持多个目录方式，只要用冒号（：）隔开就可以</span><br><span class="line">forks &#x3D; 5		                    #并发连接数，默认为5</span><br><span class="line">sudo_user &#x3D; root		            #设置默认执行命令的用户</span><br><span class="line">remote_port &#x3D; 22		            #指定连接被管节点的管理端口，默认为22端口，建议修改，能够更加安全</span><br><span class="line">host_key_checking &#x3D; False		    #设置是否检查SSH主机的密钥，值为True&#x2F;False。关闭后第一次连接不会提示配置实例</span><br><span class="line">timeout &#x3D; 60		                #设置SSH连接的超时时间，单位为秒</span><br><span class="line">log_path &#x3D; &#x2F;var&#x2F;log&#x2F;ansible.log		#指定一个存储ansible日志的文件（默认不记录日志）</span><br></pre></td></tr></table></figure>
+<p>hosts文件中包含了主机信息，可对主机进行分组</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">test</span>]</span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br></pre></td></tr></table></figure>
+<h2 id="ansible-主要有两种命令模式"><a href="#ansible-主要有两种命令模式" class="headerlink" title="ansible 主要有两种命令模式"></a>ansible 主要有两种命令模式</h2></li>
+</ul>
+</li>
+<li><p>ansible：临时命令执行工具，常用于临时命令的执行，和在bash执行效果一致 </p>
+<p>ansible &lt;host-pattern&gt; [-f forks] [-m module_name] [-a args]</p>
+<ul>
+<li><p>如果使用账号密码登录需要在hosts文件中配置相关信息，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[test:vars]</span><br><span class="line">ansible_ssh_user&#x3D;&#39;liangquanle&#39;</span><br><span class="line">ansible_ssh_pass&#x3D;&#39;xxxxxxx&#39;</span><br></pre></td></tr></table></figure></li>
+<li><p>主机连通性测试：ansible test -m ping</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ansible test -m ping</span><br><span class="line">127.0.0.1 | SUCCESS =&gt; &#123;</span><br><span class="line">    &quot;ansible_facts&quot;: &#123;</span><br><span class="line">        &quot;discovered_interpreter_python&quot;: &quot;/usr/bin/python&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;changed&quot;: false,</span><br><span class="line">    &quot;ping&quot;: &quot;pong&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>command：远程执行命令并返回结果，不支持管道</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">ansible test -m command -a &#x27;ls ~/&#x27;</span><br><span class="line">127.0.0.1 | CHANGED | rc=0 &gt;&gt;</span><br><span class="line">coredump</span><br><span class="line">dev</span><br><span class="line">serv</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">管道错误</span></span><br><span class="line">ansible test -m command -a &quot;ps -ef | head&quot;</span><br><span class="line">127.0.0.1 | FAILED | rc=1 &gt;&gt;</span><br><span class="line">error: garbage option</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line"> ps [options]</span><br><span class="line"></span><br><span class="line"> Try &#x27;ps --help &lt;simple|list|output|threads|misc|all&gt;&#x27;</span><br><span class="line">  or &#x27;ps --help &lt;s|l|o|t|m|a&gt;&#x27;</span><br><span class="line"> for additional help text.</span><br><span class="line"></span><br><span class="line">For more details see ps(1).non-zero return code</span><br></pre></td></tr></table></figure></li>
+<li><p>shell：与command类似但是能使用管道以及各种知识shell 命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ansible test -m shell -a &quot;ps -ef | head&quot;</span><br><span class="line">127.0.0.1 | CHANGED | rc=0 &gt;&gt;</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0  2020 ?        06:26:22 /usr/lib/systemd/systemd --switched-root --system --deserialize 22</span><br><span class="line">root         2     0  0  2020 ?        00:00:16 [kthreadd]</span><br><span class="line">root         3     2  0  2020 ?        00:01:17 [ksoftirqd/0]</span><br><span class="line">root         5     2  0  2020 ?        00:00:00 [kworker/0:0H]</span><br><span class="line">root         7     2  0  2020 ?        00:01:42 [migration/0]</span><br><span class="line">root         8     2  0  2020 ?        00:00:00 [rcu_bh]</span><br><span class="line">root         9     2  0  2020 ?        00:00:00 [rcuob/0]</span><br><span class="line">root        10     2  0  2020 ?        00:00:00 [rcuob/1]</span><br><span class="line">root        11     2  0  2020 ?        00:00:00 [rcuob/2]</span><br></pre></td></tr></table></figure></li>
+<li><p>其他：copy、file、fetch、cron 、yum、service、user、group、script、setup、我们项目中应该用不到,有用到在添加使用说明</p>
+</li>
+</ul>
+</li>
+<li><p>ansible-playbook：Ansible 定制自动化的任务集编排工具</p>
+<p>ansible-playbook 通过编写yaml文件来对任务进行编排</p>
+<ul>
+<li>–inventory=path，指定inventory文件，默认是在/etc/ansible/hosts下面。</li>
+<li>–verbose，显示详细的输出，使用-vvvv显示精确到每分钟的输出。</li>
+<li>–extra-vars=vars：定义在playbook使用的变量。</li>
+<li>–forks：指定并发的线程数，默认是5.</li>
+<li>–connection=type:指定远程连接主机的方式，默认是ssh，设置为local时，则只在本地执行playbook、</li>
+<li>–check:检测模式，playbook中定义的所有任务将在每台主机上检测，但是并不执行。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ansible-playbook test.yml --syntax-check            #检查yaml文件的语法是否正确</span><br><span class="line">ansible-playbook test.yml --list-task               #检查tasks任务</span><br><span class="line">ansible-playbook test.yml --list-hosts              #检查生效的主机</span><br><span class="line">ansible-playbook test.yml --start-at-task=&#x27;xxx&#x27;     #指定从某个task开始运行</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="example"><a href="#example" class="headerlink" title="example"></a>example</h2><ul>
+<li><p>基本配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">hosts:</span> <span class="string">test</span>                 <span class="comment">#指定主机组，可以是一个或多个组。</span></span><br><span class="line">  <span class="attr">remote_user:</span> <span class="string">xxxx</span>           <span class="comment">#指定远程主机执行的用户名(使用秘钥登录不需摇密码)</span></span><br><span class="line">  <span class="attr">gather_facts:</span> <span class="string">F</span>             <span class="comment">#不收集对应主机的信息，这样运行会快点。</span></span><br><span class="line">  <span class="attr">sudo:</span> <span class="literal">yes</span>                   <span class="comment">#使用sudo执行命令</span></span><br><span class="line">  <span class="attr">sudo_user:</span> <span class="string">xxxx</span>             <span class="comment">#切换到执行用户执行</span></span><br><span class="line">  <span class="attr">tasks:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">&#x27;xxxx&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>变量</p>
+<ul>
+<li><p>ansible-playbook test.yml –extra-vars “test_var=test”</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">hosts:</span> <span class="string">test</span>                 <span class="comment">#指定主机组，可以是一个或多个组。</span></span><br><span class="line">  <span class="attr">remote_user:</span> <span class="string">xxxx</span>           <span class="comment">#指定远程主机执行的用户名(使用秘钥登录不需摇密码)</span></span><br><span class="line">  <span class="attr">gather_facts:</span> <span class="string">F</span>             <span class="comment">#不收集对应主机的信息，这样运行会快点。</span></span><br><span class="line">  <span class="attr">sudo:</span> <span class="literal">yes</span>                   <span class="comment">#使用sudo执行命令</span></span><br><span class="line">  <span class="attr">sudo_user:</span> <span class="string">xxxx</span>             <span class="comment">#切换到执行用户执行</span></span><br><span class="line">  <span class="attr">tasks:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">echo</span> &#123;&#123; <span class="string">test_var</span> &#125;&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>定时在代码块中：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">hosts:</span> <span class="string">test</span>                 <span class="comment">#指定主机组，可以是一个或多个组。</span></span><br><span class="line">  <span class="attr">remote_user:</span> <span class="string">xxxx</span>           <span class="comment">#指定远程主机执行的用户名(使用秘钥登录不需摇密码)</span></span><br><span class="line">  <span class="attr">gather_facts:</span> <span class="string">F</span>             <span class="comment">#不收集对应主机的信息，这样运行会快点。</span></span><br><span class="line">  <span class="attr">sudo:</span> <span class="literal">yes</span>                   <span class="comment">#使用sudo执行命令</span></span><br><span class="line">  <span class="attr">sudo_user:</span> <span class="string">xxxx</span>             <span class="comment">#切换到执行用户执行</span></span><br><span class="line">  <span class="attr">vars:</span>                       <span class="comment">#在这里使用了vars代码块来定义变量</span></span><br><span class="line">  	<span class="attr">test_var:</span> <span class="string">Hello</span> <span class="string">World</span></span><br><span class="line">  <span class="attr">tasks:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">echo</span> &#123;&#123; <span class="string">test_var</span> &#125;&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>使用独立文件：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">hosts:</span> <span class="string">test</span>                 <span class="comment">#指定主机组，可以是一个或多个组。</span></span><br><span class="line">  <span class="attr">remote_user:</span> <span class="string">xxxx</span>           <span class="comment">#指定远程主机执行的用户名(使用秘钥登录不需摇密码)</span></span><br><span class="line">  <span class="attr">gather_facts:</span> <span class="string">F</span>             <span class="comment">#不收集对应主机的信息，这样运行会快点。</span></span><br><span class="line">  <span class="attr">sudo:</span> <span class="literal">yes</span>                   <span class="comment">#使用sudo执行命令</span></span><br><span class="line">  <span class="attr">sudo_user:</span> <span class="string">xxxx</span>             <span class="comment">#切换到执行用户执行</span></span><br><span class="line">  <span class="attr">vars_files:</span>                 <span class="comment">#这里使用了vars_files来引入变量文件</span></span><br><span class="line">  	<span class="bullet">-</span> <span class="string">vars.yml</span></span><br><span class="line">  <span class="attr">tasks:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">echo</span> &#123;&#123; <span class="string">test_var</span> &#125;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line">  <span class="attr">test_var:</span> <span class="string">Hello</span> <span class="string">World</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">LeungLoh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://leungloh.com/2021/06/07/ansible/">http://leungloh.com/2021/06/07/ansible/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://LeungLoh.com" target="_blank">LeungLoh</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/tools/">tools</a></div><div class="post_share"></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/"><img class="prev-cover" src="/images/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">后台管理项目总结</div></div></a></div><div class="next-post pull-right"><a href="/2021/01/13/redis%E6%80%BB%E7%BB%93/"><img class="next-cover" src="/images/redis%E6%80%BB%E7%BB%93.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">redis总结</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/03/18/Git常用命令/" title="Git常用命令"><img class="cover" src="/images/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-18</div><div class="title">Git常用命令</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">LeungLoh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LeungLoh"><i class="fab fa-github"></i><span>Github</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ansible-%E4%BB%8B%E7%BB%8D%E4%B8%8E%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">ansible 介绍与使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="toc-number">1.1.</span> <span class="toc-text">官方文档</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">安装与配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ansible-%E4%B8%BB%E8%A6%81%E6%9C%89%E4%B8%A4%E7%A7%8D%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.3.</span> <span class="toc-text">ansible 主要有两种命令模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#example"><span class="toc-number">1.4.</span> <span class="toc-text">example</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/" title="后台管理项目总结"><img src="/images/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="后台管理项目总结"/></a><div class="content"><a class="title" href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/" title="后台管理项目总结">后台管理项目总结</a><time datetime="2021-06-16T16:00:00.000Z" title="发表于 2021-06-17 00:00:00">2021-06-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/07/ansible/" title="ansible"><img src="/images/ansible.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ansible"/></a><div class="content"><a class="title" href="/2021/06/07/ansible/" title="ansible">ansible</a><time datetime="2021-06-06T16:00:00.000Z" title="发表于 2021-06-07 00:00:00">2021-06-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/13/redis%E6%80%BB%E7%BB%93/" title="redis总结"><img src="/images/redis%E6%80%BB%E7%BB%93.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="redis总结"/></a><div class="content"><a class="title" href="/2021/01/13/redis%E6%80%BB%E7%BB%93/" title="redis总结">redis总结</a><time datetime="2021-01-12T16:00:00.000Z" title="发表于 2021-01-13 00:00:00">2021-01-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令"><img src="/images/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Git常用命令"/></a><div class="content"><a class="title" href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令">Git常用命令</a><time datetime="2020-03-17T16:00:00.000Z" title="发表于 2020-03-18 00:00:00">2020-03-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/" title="IO多路复用,同步，异步，阻塞和非阻塞"><img src="/images/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="IO多路复用,同步，异步，阻塞和非阻塞"/></a><div class="content"><a class="title" href="/2018/05/09/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8,%E5%90%8C%E6%AD%A5%EF%BC%8C%E5%BC%82%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%20/" title="IO多路复用,同步，异步，阻塞和非阻塞">IO多路复用,同步，异步，阻塞和非阻塞</a><time datetime="2018-05-08T16:00:00.000Z" title="发表于 2018-05-09 00:00:00">2018-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By LeungLoh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
