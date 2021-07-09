@@ -1,0 +1,354 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hadoop大数据环境部署 | LeungLoh</title><meta name="keywords" content="tools"><meta name="author" content="LeungLoh"><meta name="copyright" content="LeungLoh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="hadoop家族大数据环境安装部署前言网上其实有很多关于hadoop、hbase、hive等环境的安装配置，但是大部分都是某个环境独立的安装配置并且没有写明版本信息，在我看来没写明版本信息的安装都是耍流氓，尤其是大版本之间的变化会导致很多问题，所以根据自己的根据自己的安装版本以及配置做一个总结。 环境配置   软件 版本 配置    system CentOS 7.6 云服务器   jdk 1.8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hadoop大数据环境部署">
+<meta property="og:url" content="http://leungloh.com/2021/07/09/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/index.html">
+<meta property="og:site_name" content="LeungLoh">
+<meta property="og:description" content="hadoop家族大数据环境安装部署前言网上其实有很多关于hadoop、hbase、hive等环境的安装配置，但是大部分都是某个环境独立的安装配置并且没有写明版本信息，在我看来没写明版本信息的安装都是耍流氓，尤其是大版本之间的变化会导致很多问题，所以根据自己的根据自己的安装版本以及配置做一个总结。 环境配置   软件 版本 配置    system CentOS 7.6 云服务器   jdk 1.8">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leungloh.com/images/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/top.jpg">
+<meta property="article:published_time" content="2021-07-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-09T08:49:55.191Z">
+<meta property="article:author" content="LeungLoh">
+<meta property="article:tag" content="tools">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leungloh.com/images/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/top.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://leungloh.com/2021/07/09/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-07-09 16:49:55'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/images/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/top.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">LeungLoh</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">hadoop大数据环境部署</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-07-08T16:00:00.000Z" title="发表于 2021-07-09 00:00:00">2021-07-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-07-09T08:49:55.191Z" title="更新于 2021-07-09 16:49:55">2021-07-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0/">学习</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="hadoop家族大数据环境安装部署"><a href="#hadoop家族大数据环境安装部署" class="headerlink" title="hadoop家族大数据环境安装部署"></a>hadoop家族大数据环境安装部署</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>网上其实有很多关于hadoop、hbase、hive等环境的安装配置，但是大部分都是某个环境独立的安装配置并且没有写明版本信息，在我看来没写明版本信息的安装都是耍流氓，尤其是大版本之间的变化会导致很多问题，所以根据自己的根据自己的安装版本以及配置做一个总结。</p>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><table>
+<thead>
+<tr>
+<th>软件</th>
+<th>版本</th>
+<th>配置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>system</td>
+<td>CentOS 7.6</td>
+<td>云服务器</td>
+</tr>
+<tr>
+<td>jdk</td>
+<td>1.8</td>
+<td>-</td>
+</tr>
+<tr>
+<td>mysql</td>
+<td>5.7.30</td>
+<td>-</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="http://archive.apache.org/dist/hadoop/core/hadoop-2.7.6/hadoop-2.7.6.tar.gz">hadoop</a></td>
+<td>2.7.6</td>
+<td>伪分布式</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="http://archive.apache.org/dist/hbase/2.1.9/hbase-2.1.9-bin.tar.gz">hbase</a></td>
+<td>2.1.9</td>
+<td>单机</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="http://archive.apache.org/dist/hive/hive-2.3.2/apache-hive-2.3.2-bin.tar.gz">hive</a></td>
+<td>2.3.2</td>
+<td>单机</td>
+</tr>
+</tbody></table>
+<p>本文主要介绍hadoop相关环境配置，至于jdk、mysql的安装不做过多的赘述，以下按照你hadoop、hive、hbase的安装顺序依次进行安装介绍。</p>
+<h2 id="安装部署"><a href="#安装部署" class="headerlink" title="安装部署"></a>安装部署</h2><h3 id="设置免密登录"><a href="#设置免密登录" class="headerlink" title="设置免密登录"></a>设置免密登录</h3><p>由于后面的操作大部分都需要输入密码，为方便操作使用免密登录，避免重复输入密码，如果想输入密码可以忽略</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">生成ssh（已经生成的话忽略）</span></span><br><span class="line">[root@leungloh ~]# ssh-keygen -t rsa</span><br><span class="line">[root@leungloh ~]# ls ~/.ssh/</span><br><span class="line">id_rsa  id_rsa.pub  known_hosts</span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果出现id_rsa  id_rsa.pub  known_hosts 表示成功</span></span><br><span class="line">[root@leungloh ~]# cat ~/.ssh/id_rsa.pub&gt;&gt; ~/.ssh/authorized_keys</span><br><span class="line"><span class="meta">#</span><span class="bash">测试</span></span><br><span class="line">ssh localhost</span><br></pre></td></tr></table></figure>
+<h3 id="Hadoop"><a href="#Hadoop" class="headerlink" title="Hadoop"></a>Hadoop</h3><ul>
+<li><p>将安装包下载好后直接解压，并且移动到<code>/usr/local</code>下面</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tar -xvzf hadoop-2.7.6.tar.gz</span><br><span class="line">mv hadoop-2.7.6 /usr/local/hadoop</span><br></pre></td></tr></table></figure></li>
+<li><p>创建后续需要是用到的目录</p>
+<ul>
+<li><code>cd /usr/local/hadoop &amp;&amp; mkdir -p tmp hdfs hdfs/data hdfs/name</code></li>
+</ul>
+</li>
+<li><p>添加环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export HADOOP_HOME=/usr/local/hadoop</span><br><span class="line">export HADOOP_CONF_DIR=$&#123;HADOOP_HOME&#125;/etc/hadoop</span><br><span class="line">export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native</span><br><span class="line">export HADOOP_OPTS=&quot;-Djava.library.path=$HADOOP_HOME/lib:$HADOOP_COMMON_LIB_NATIVE_DIR&quot;</span><br><span class="line">export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin</span><br></pre></td></tr></table></figure></li>
+<li><p>修改配置文件，配置文件的路径在<code>$HADOOP_CONF_DIR</code></p>
+<ul>
+<li><p>core-site.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.defaultFS<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://localhost:9000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tmp.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>file:/usr/local/hadoop/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>io.file.buffer.size<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>131702<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>设置 HDFS NameNode 的 URI 为 <code>IP1:9000</code></li>
+<li>设定了 I/O 文件缓存容量</li>
+</ul>
+</li>
+<li><p>hdfs-site.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.name.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>file:/usr/local/hadoop/hdfs/name<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.datanode.data.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>file:/usr/local/hadoop/hdfs/data<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.replication<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>1<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.secondary.http-address<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>localhost:9001<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.webhdfs.enabled<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>true<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>设定 Namenode 信息存储目录</li>
+<li>设定 DataNode 的目录路径</li>
+<li>设置副本数为 1</li>
+<li>设置 Secondary NameNode URI 为 <code>IP2:9001</code> (slave1 &lt;=&gt; IP2)</li>
+<li>开启 WebHDFS 模块</li>
+</ul>
+</li>
+<li><p>mapred-site.xml(<code>cp mapred-site.xml.template mapred-site.xml</code>)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.framework.name<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>yarn<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.jobhistory.address<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>localhost:10020<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.jobhistory.webapp.address<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>localhost:19888<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>任务历史默认端口也是 10020</li>
+<li>任务历史 Web 界面端口也是 19888</li>
+</ul>
+</li>
+<li><p>yarn-site.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Site specific YARN configuration properties --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.nodemanager.aux-services<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>mapreduce_shuffle<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.nodemanager.aux-services.mapreduce_shuffle.class<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>org.apache.hadoop.mapred.ShuffleHandler<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 对namenode进行格式化，如果后续需要重新格式化 删除 之前创建的hdfs/data hdfs/name下面的目录 重新创建即可</span> </span><br><span class="line">[root@leungloh ~]# hdfs namenode -format</span><br><span class="line"><span class="meta">#</span><span class="bash">启动可以使用start-all.sh 或者分开执行 start-dfs.sh、start-yarn.sh都可以</span></span><br><span class="line">[root@leungloh ~]# start-sll.sh</span><br><span class="line"><span class="meta">#</span><span class="bash">停止与启动相同stop-all.sh，或者分开执行 stop-dfs.sh、stop-yarn.sh都可以</span></span><br><span class="line">[root@leungloh ~]# stop-all.sh</span><br><span class="line"><span class="meta">#</span><span class="bash">启动完成后输入jps能看到相关信息</span></span><br><span class="line">[root@leungloh ~]# jps</span><br><span class="line">2021 ResourceManager</span><br><span class="line">2150 NodeManager</span><br><span class="line">1462 NameNode</span><br><span class="line">11992 Jps</span><br><span class="line">1817 SecondaryNameNode</span><br><span class="line">1615 DataNode</span><br></pre></td></tr></table></figure></li>
+<li><p>验证(需要开放防火墙端口)</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://ip:8088/">http://ip:8088/</a></li>
+<li><a target="_blank" rel="noopener" href="http://ip:50070/">http://ip:50070/</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="Hive"><a href="#Hive" class="headerlink" title="Hive"></a>Hive</h3><ul>
+<li><p>hive需要依赖其他数据库，所以需要提前安装好mysql</p>
+</li>
+<li><p>将安装包下载好后直接解压，并且移动到<code>/usr/local</code>下面</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tar -xvzf apache-hive-2.3.2-bin.tar.gz</span><br><span class="line">mv apache-hive-2.3.2-bin /usr/local/hadoop</span><br></pre></td></tr></table></figure></li>
+<li><p>创建后续需要是用到的目录</p>
+<p><code>cd /usr/local/hive &amp;&amp; mkdir -p tmp</code></p>
+</li>
+<li><p>添加环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export HIVE_HOME=/usr/local/hive</span><br><span class="line">export PATH=$PATH:$HIVE_HOME/bin</span><br></pre></td></tr></table></figure></li>
+<li><p>在mysql官网下载jdbc驱动包并且放入<code>$HIVE_HOME/lib</code></p>
+<p><code>mysql-connector-java-5.1.47.jar</code></p>
+</li>
+<li><p>修改配置文件，配置文件的路径在<code>$HIVE_HOME/conf </code></p>
+<ul>
+<li><p>hive-site.xml(<code>cp hive-default.xml.template hive-site.xml</code>)</p>
+<ul>
+<li><p>将文件中的所以<code>system:java.io.tmpdir</code>替换成临时目录，我替换成<code>/usr/local/hive/tmp</code>，将文件中的所以<code>&#123;system:user.name&#125;</code>替换成<code>root</code></p>
+<p>例如：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.exec.local.scratchdir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">value</span>&gt;</span>$&#123;system:java.io.tmpdir&#125;/$&#123;system:user.name&#125;<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">description</span>&gt;</span>Local scratch space for Hive jobs<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">#修改为</span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.exec.local.scratchdir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">value</span>&gt;</span>/usr/local/hive/tmp/root<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">description</span>&gt;</span>Local scratch space for Hive jobs<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>将javax.jdo.option.ConnectionDriverName 对应的value修改为MySQL驱动路径：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>javax.jdo.option.ConnectionDriverName<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>com.mysql.jdbc.Driver<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span>Driver class name for a JDBC metastore<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>将javax.jdo.option.ConnectionURL,对应的value修改为MySQL的地址:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">name</span>&gt;</span>javax.jdo.option.ConnectionURL<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>jdbc:mysql://localhost:3306/metastore?createDatabaseIfNotExist=true<span class="symbol">&amp;amp;</span>characterEncoding=UTF-8<span class="symbol">&amp;amp;</span>useSSL=false<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span></span><br><span class="line">      JDBC connect string for a JDBC metastore.</span><br><span class="line">      To use SSL to encrypt/authenticate the connection, provide database-specific SSL flag in the connection URL. </span><br><span class="line">      For example, jdbc:postgresql://myhost/db?ssl=true for postgres database.</span><br><span class="line">    <span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>将javax.jdo.option.ConnectionUserName 对应的value修改为MySQL数据库登录名：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>javax.jdo.option.ConnectionUserName<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>root<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span>Username to use against metastore database<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>将javax.jdo.option.ConnectionPassword 对应的value修改为MySQL数据库的登录密码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>javax.jdo.option.ConnectionPassword<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>123456<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span>password to use against metastore database<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>将hive.metastore.schema.verificatio 对应的value修改为false:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.metastore.schema.verification<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>false<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span></span><br><span class="line">      Enforce metastore schema version consistency.</span><br><span class="line">      True: Verify that version information stored in is compatible with one from Hive jars.  Also disable automatic</span><br><span class="line">            schema migration attempt. Users are required to manually migrate schema after Hive upgrade which ensures</span><br><span class="line">            proper metastore schema migration. (Default)</span><br><span class="line">      False: Warn if the version information stored in metastore doesn&#x27;t match with one from in Hive jars.</span><br><span class="line">    <span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>修改hive-env.sh(<code>cp hive-env.sh.template hive-env.sh</code>) 添加以下内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export HADOOP_HOME=/usr/local/hadoop</span><br><span class="line">export HIVE_CONF_DIR=/usr/local/hive/conf</span><br><span class="line">export HIVE_AUX_JARS_PATH=/usr/local/hive/lib</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>启动</p>
+<ul>
+<li><p>对mysql数据库进行初始化</p>
+<ul>
+<li><p><code>schematool -initSchema -dbType mysql</code> 出现<code>schemaTool completed</code>即可</p>
+</li>
+<li><p>登录mysql查看,metastore是否初始化完成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show databases;</span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| information_schema |</span><br><span class="line">| metastore          |</span><br><span class="line">| mysql              |</span><br><span class="line">| performance_schema |</span><br><span class="line">| sys                |</span><br><span class="line">+--------------------+</span><br><span class="line">5 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; use metastore</span><br><span class="line">Reading table information for completion of table and column names</span><br><span class="line">You can turn off this feature to get a quicker startup with -A</span><br><span class="line"></span><br><span class="line">Database changed</span><br><span class="line">mysql&gt; show tables;</span><br><span class="line">+---------------------------+</span><br><span class="line">| Tables_in_metastore       |</span><br><span class="line">+---------------------------+</span><br><span class="line">| aux_table                 |</span><br><span class="line">| bucketing_cols            |</span><br><span class="line">| cds                       |</span><br><span class="line">| columns_v2                |</span><br><span class="line">| compaction_queue          |</span><br><span class="line">| completed_compactions     |</span><br><span class="line">| completed_txn_components  |</span><br><span class="line">| database_params           |</span><br><span class="line">| db_privs                  |</span><br><span class="line">| dbs                       |</span><br><span class="line">| delegation_tokens         |</span><br><span class="line">| func_ru                   |</span><br><span class="line">| funcs                     |</span><br><span class="line">| global_privs              |</span><br><span class="line">| hive_locks                |</span><br><span class="line">| idxs                      |</span><br><span class="line">| index_params              |</span><br><span class="line">| key_constraints           |</span><br><span class="line">| master_keys               |</span><br><span class="line">| next_compaction_queue_id  |</span><br><span class="line">| next_lock_id              |</span><br><span class="line">| next_txn_id               |</span><br><span class="line">| notification_log          |</span><br><span class="line">| notification_sequence     |</span><br><span class="line">| nucleus_tables            |</span><br><span class="line">| part_col_privs            |</span><br><span class="line">| part_col_stats            |</span><br><span class="line">| part_privs                |</span><br><span class="line">| partition_events          |</span><br><span class="line">| partition_key_vals        |</span><br><span class="line">| partition_keys            |</span><br><span class="line">| partition_params          |</span><br><span class="line">| partitions                |</span><br><span class="line">| role_map                  |</span><br><span class="line">| roles                     |</span><br><span class="line">| sd_params                 |</span><br><span class="line">| sds                       |</span><br><span class="line">| sequence_table            |</span><br><span class="line">| serde_params              |</span><br><span class="line">| serdes                    |</span><br><span class="line">| skewed_col_names          |</span><br><span class="line">| skewed_col_value_loc_map  |</span><br><span class="line">| skewed_string_list        |</span><br><span class="line">| skewed_string_list_values |</span><br><span class="line">| skewed_values             |</span><br><span class="line">| sort_cols                 |</span><br><span class="line">| tab_col_stats             |</span><br><span class="line">| table_params              |</span><br><span class="line">| tbl_col_privs             |</span><br><span class="line">| tbl_privs                 |</span><br><span class="line">| tbls                      |</span><br><span class="line">| txn_components            |</span><br><span class="line">| txns                      |</span><br><span class="line">| type_fields               |</span><br><span class="line">| types                     |</span><br><span class="line">| version                   |</span><br><span class="line">| write_set                 |</span><br><span class="line">+---------------------------+</span><br><span class="line">57 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>启动hive客户端&amp;&amp;验证</p>
+<ul>
+<li><p>创建一个<code>sturent.txt</code>的文件</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">95002,刘晨,女,19,IS</span><br><span class="line">95017,王风娟,女,18,IS</span><br><span class="line">95018,王一,女,19,IS</span><br><span class="line">95013,冯伟,男,21,CS</span><br><span class="line">95014,王小丽,女,19,CS</span><br><span class="line">95019,邢小丽,女,19,IS</span><br><span class="line">95020,赵钱,男,21,IS</span><br><span class="line">95003,王敏,女,22,MA</span><br><span class="line">95004,张立,男,19,IS</span><br><span class="line">95012,孙花,女,20,CS</span><br><span class="line">95010,孔小涛,男,19,CS</span><br><span class="line">95005,刘刚,男,18,MA</span><br><span class="line">95006,孙庆,男,23,CS</span><br><span class="line">95007,易思玲,女,19,MA</span><br><span class="line">95008,李娜,女,18,CS</span><br><span class="line">95021,周二,男,17,MA</span><br><span class="line">95022,郑明,男,20,MA</span><br><span class="line">95001,李勇,男,20,CS</span><br><span class="line">95011,包小柏,男,18,MA</span><br><span class="line">95009,梦圆圆,女,18,MA</span><br><span class="line">95015,王君,男,18,MA</span><br></pre></td></tr></table></figure></li>
+<li><p>启动hive客户端<code>hive</code></p>
+</li>
+<li><p>创建数据库test</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; create database test;</span><br><span class="line">OK</span><br><span class="line">Time taken: 3.706 seconds</span><br><span class="line">hive&gt; use test;</span><br><span class="line">OK</span><br><span class="line">Time taken: 0.021 seconds</span><br><span class="line">hive&gt; select current_database();</span><br><span class="line">OK</span><br><span class="line">test</span><br><span class="line">Time taken: 0.59 seconds, Fetched: 1 row(s)</span><br></pre></td></tr></table></figure></li>
+<li><p>创建student表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; create table student(id int, name string, sex string, age int, department string) row format delimited fields terminated by &quot;,&quot;;</span><br><span class="line">OK</span><br><span class="line">Time taken: 0.524 seconds</span><br></pre></td></tr></table></figure></li>
+<li><p>导入数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; load data local inpath &quot;&#x2F;root&#x2F;student.txt&quot; into table student;</span><br><span class="line">Loading data to table test.student</span><br><span class="line">OK</span><br><span class="line">Time taken: 1.406 seconds</span><br></pre></td></tr></table></figure></li>
+<li><p>查询数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; select * from student;</span><br><span class="line">OK</span><br><span class="line">95002	刘晨	女	19	IS</span><br><span class="line">95017	王风娟	女	18	IS</span><br><span class="line">95018	王一	女	19	IS</span><br><span class="line">95013	冯伟	男	21	CS</span><br><span class="line">95014	王小丽	女	19	CS</span><br><span class="line">95019	邢小丽	女	19	IS</span><br><span class="line">95020	赵钱	男	21	IS</span><br><span class="line">95003	王敏	女	22	MA</span><br><span class="line">95004	张立	男	19	IS</span><br><span class="line">95012	孙花	女	20	CS</span><br><span class="line">95010	孔小涛	男	19	CS</span><br><span class="line">95005	刘刚	男	18	MA</span><br><span class="line">95006	孙庆	男	23	CS</span><br><span class="line">95007	易思玲	女	19	MA</span><br><span class="line">95008	李娜	女	18	CS</span><br><span class="line">95021	周二	男	17	MA</span><br><span class="line">95022	郑明	男	20	MA</span><br><span class="line">95001	李勇	男	20	CS</span><br><span class="line">95011	包小柏	男	18	MA</span><br><span class="line">95009	梦圆圆	女	18	MA</span><br><span class="line">95015	王君	男	18	MA</span><br><span class="line">Time taken: 1.174 seconds, Fetched: 21 row(s)</span><br></pre></td></tr></table></figure></li>
+<li><p>查看hdfs</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@leungloh ]# hadoop fs -ls /user/hive/warehouse</span><br><span class="line">Found 1 items</span><br><span class="line">drwxr-xr-x   - root supergroup          0 2021-07-09 12:57 /user/hive/warehouse/test.db</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Hbase"><a href="#Hbase" class="headerlink" title="Hbase"></a>Hbase</h3><ul>
+<li><p>将安装包下载好后直接解压，并且移动到<code>/usr/local</code>下面</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tar -xvzf hbase-2.1.9-bin.tar.gz</span><br><span class="line">mv hbase-2.1.9 /usr/local/hbase</span><br></pre></td></tr></table></figure></li>
+<li><p>添加环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export HBASE_HOME=/usr/local/hbase</span><br><span class="line">export PATH=$PATH：$HBASE_HOME/bin</span><br></pre></td></tr></table></figure></li>
+<li><p>修改配置文件</p>
+<ul>
+<li><p>hbase-site.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span> hbase.rootdir <span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://localhost:9000/hbase<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>启动</p>
+<ul>
+<li><p>start-hbase.sh 查看jps 出现HMaster，如果出现zk连接错误请检查hosts配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">jps</span><br><span class="line">23653 Jps</span><br><span class="line">2021 ResourceManager</span><br><span class="line">2150 NodeManager</span><br><span class="line">1462 NameNode</span><br><span class="line">1817 SecondaryNameNode</span><br><span class="line">23500 HMaster</span><br><span class="line">1615 DataNode</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>验证</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">[root@leungloh ~]# hbase shell</span><br><span class="line">SLF4J: Class path contains multiple SLF4J bindings.</span><br><span class="line">SLF4J: Found binding in [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/client-facing-thirdparty/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.</span><br><span class="line">SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]</span><br><span class="line">HBase Shell</span><br><span class="line">Use &quot;help&quot; to get list of supported commands.</span><br><span class="line">Use &quot;exit&quot; to quit this interactive shell.</span><br><span class="line">For Reference, please visit: http://hbase.apache.org/2.0/book.html#shell</span><br><span class="line">Version 2.1.9, rec4145ba5dc9cd30d4eb700bca2de2d08104207c, Tue Feb 11 03:49:57 UTC 2020</span><br><span class="line">Took 0.0032 seconds</span><br><span class="line">hbase(main):001:0&gt; create &#x27;test&#x27;,&#x27;data&#x27;</span><br><span class="line">Created table test</span><br><span class="line">Took 1.7033 seconds</span><br><span class="line">=&gt; Hbase::Table - test</span><br><span class="line">hbase(main):002:0&gt; list</span><br><span class="line">TABLE              </span><br><span class="line">test               </span><br><span class="line">1 row(s)</span><br><span class="line">Took 0.0278 seconds</span><br><span class="line">=&gt; [&quot;test&quot;]</span><br><span class="line">hbase(main):003:0&gt; put &#x27;test&#x27;,&#x27;rowkey1&#x27;,&#x27;data:value1&#x27;,&#x27;value1&#x27;</span><br><span class="line">Took 0.1503 seconds</span><br><span class="line">hbase(main):004:0&gt; put &#x27;test&#x27;,&#x27;rowkey2&#x27;,&#x27;data:value2&#x27;,&#x27;value2&#x27;</span><br><span class="line">Took 0.0177 seconds</span><br><span class="line">hbase(main):005:0&gt; put &#x27;test&#x27;,&#x27;rowkey3&#x27;,&#x27;data:value3&#x27;,&#x27;value3&#x27;</span><br><span class="line">Took 0.0058 seconds </span><br><span class="line">hbase(main):007:0&gt; get &#x27;test&#x27;,&#x27;data&#x27;</span><br><span class="line">COLUMN CELL        </span><br><span class="line">0 row(s)</span><br><span class="line">Took 0.0527 seconds</span><br><span class="line">hbase(main):008:0&gt; scan &#x27;test&#x27;</span><br><span class="line">ROW    COLUMN+CELL </span><br><span class="line"> rowkey1                                                    column=data:value1, timestamp=1625818105328, value=value1</span><br><span class="line"> rowkey2                                                    column=data:value2, timestamp=1625818112455, value=value2</span><br><span class="line"> rowkey3                                                    column=data:value3, timestamp=1625818119033, value=value3</span><br><span class="line">3 row(s)</span><br><span class="line">Took 0.0265 seconds</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">LeungLoh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://leungloh.com/2021/07/09/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/">http://leungloh.com/2021/07/09/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://LeungLoh.com" target="_blank">LeungLoh</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/tools/">tools</a></div><div class="post_share"></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/"><img class="next-cover" src="/images/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/top.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">后台管理项目总结</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/03/18/Git常用命令/" title="Git常用命令"><img class="cover" src="/images/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/top.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-18</div><div class="title">Git常用命令</div></div></a></div><div><a href="/2021/06/07/ansible/" title="ansible"><img class="cover" src="/images/ansible/top.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-07</div><div class="title">ansible</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">LeungLoh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LeungLoh"><i class="fab fa-github"></i><span>Github</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#hadoop%E5%AE%B6%E6%97%8F%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2"><span class="toc-number">1.</span> <span class="toc-text">hadoop家族大数据环境安装部署</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">环境配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2"><span class="toc-number">1.3.</span> <span class="toc-text">安装部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E5%85%8D%E5%AF%86%E7%99%BB%E5%BD%95"><span class="toc-number">1.3.1.</span> <span class="toc-text">设置免密登录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hadoop"><span class="toc-number">1.3.2.</span> <span class="toc-text">Hadoop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hive"><span class="toc-number">1.3.3.</span> <span class="toc-text">Hive</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hbase"><span class="toc-number">1.3.4.</span> <span class="toc-text">Hbase</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/07/09/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/" title="hadoop大数据环境部署"><img src="/images/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/top.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hadoop大数据环境部署"/></a><div class="content"><a class="title" href="/2021/07/09/hadoop%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/" title="hadoop大数据环境部署">hadoop大数据环境部署</a><time datetime="2021-07-08T16:00:00.000Z" title="发表于 2021-07-09 00:00:00">2021-07-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/" title="后台管理项目总结"><img src="/images/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/top.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="后台管理项目总结"/></a><div class="content"><a class="title" href="/2021/06/17/%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E9%A1%B9%E7%9B%AE%E6%80%BB%E7%BB%93/" title="后台管理项目总结">后台管理项目总结</a><time datetime="2021-06-16T16:00:00.000Z" title="发表于 2021-06-17 00:00:00">2021-06-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/07/ansible/" title="ansible"><img src="/images/ansible/top.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ansible"/></a><div class="content"><a class="title" href="/2021/06/07/ansible/" title="ansible">ansible</a><time datetime="2021-06-06T16:00:00.000Z" title="发表于 2021-06-07 00:00:00">2021-06-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/13/redis%E6%80%BB%E7%BB%93/" title="redis总结"><img src="/images/redis%E6%80%BB%E7%BB%93/top.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="redis总结"/></a><div class="content"><a class="title" href="/2021/01/13/redis%E6%80%BB%E7%BB%93/" title="redis总结">redis总结</a><time datetime="2021-01-12T16:00:00.000Z" title="发表于 2021-01-13 00:00:00">2021-01-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令"><img src="/images/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/top.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Git常用命令"/></a><div class="content"><a class="title" href="/2020/03/18/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git常用命令">Git常用命令</a><time datetime="2020-03-17T16:00:00.000Z" title="发表于 2020-03-18 00:00:00">2020-03-18</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By LeungLoh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
